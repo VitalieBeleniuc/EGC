@@ -1,0 +1,155 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Drawing;
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
+using OpenTK.Platform;
+
+//Beleniuc Vitalie 3132B Laboratorul 2
+//Exercitiul 1
+
+// Creați un proiect elementar. Urmăriți exemplul furnizat cu titlu de
+// demonstrație - OpenTK_console_sample01 și OpenTK_console_sample02.
+
+//Implementați o versiune a aplicației în care controlul obiectului randat se face:
+//⚫ prin apăsarea a 2 taste;
+//⚫ prin mișcarea mouse-ului.
+
+namespace OpenTK_Test
+{
+
+    //Aplicatie template scrisa de la 0
+    class Window : GameWindow
+    {
+        bool arata = false;
+        public Window() : base(800, 600, new GraphicsMode(32, 24, 0, 8))
+        {
+            VSync = VSyncMode.On;
+            Console.WriteLine(GL.GetString(StringName.Version));
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            GL.ClearColor(Color.Blue);
+            GL.Enable(EnableCap.DepthTest);
+            GL.DepthFunc(DepthFunction.Less);
+            GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+
+            GL.Viewport(0, 0, Width, Height);
+
+            double aspect_ratio = Width / (double)Height;
+
+            //Exercitiul 1
+            //Atenție la setarea viewport-ului. Modificați valoarea constantei
+            //„MatrixMode.Projection”. Ce observați?
+
+            Matrix4 perspective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, (float)aspect_ratio, 1, 64);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadMatrix(ref perspective);
+
+            //Daca modific valoarea constantei MatrixMode.Projection sau dispar figurile desenate.
+            // Modelview – plaseaza geometria obiectelor intr-un spatiu global, neproiectat
+            // Projection – proiectie
+            // Texture – folosita pentru proiectarea texturilor
+            // Color – ajusteaza culorile vertexurilor
+
+            Matrix4 lookat = Matrix4.LookAt(30, 30, 30, 0, 0, 0, 0, 1, 0);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadMatrix(ref lookat);
+
+
+        }
+
+        private void DrawTriunghi()
+        {
+            GL.Begin(PrimitiveType.Triangles);
+            GL.Color3(Color.Lime);
+            GL.Vertex2(-10.0f, 2.0f);
+            GL.Color3(Color.Lime);
+            GL.Vertex2(2.0f, -10.0f);
+            GL.Color3(Color.Lime);
+            GL.Vertex2(10.0f, 10.0f);
+            GL.End();
+        }
+
+        protected override void OnRenderFrame(FrameEventArgs e)
+        {
+            base.OnRenderFrame(e);
+
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.Clear(ClearBufferMask.DepthBufferBit);
+
+            if (arata == true)
+            {
+                DrawTriunghi();
+            }
+
+            SwapBuffers();
+        }
+
+        protected override void OnUpdateFrame(FrameEventArgs e)
+        {
+            base.OnUpdateFrame(e);
+
+            KeyboardState keyboard = Keyboard.GetState();
+            MouseState mouse = Mouse.GetState();
+
+
+            //prin apăsarea a 2 taste - EXERCITIUL 2
+            if (keyboard[Key.Q] && keyboard[Key.E])
+            {
+                if (arata == true)
+                {
+                    arata = false;
+                }
+                else
+                {
+                    arata = true;
+                }
+            }
+
+
+            //prin mișcarea mouse-ului - EXERCITIUL 2
+            //if (mouse[])
+            //{
+                //if (arata == true)
+                //{
+                    //arata = false;
+                //}
+                //else
+                //{
+                   // arata = true;
+                //}
+            //}
+
+            // Am incercat prin mai multe metode OnMove MouseMove OnMouseMove dar nu imi iese
+            // Am gasit o implementare pe Internet dar pare complicata pentru prima aplicatie desi am inteles principiul de lucru
+
+
+            if (keyboard[Key.Escape])
+            {
+                Exit();
+            }
+        }
+
+        static void Main(string[] args)
+        {
+            using (Window example = new Window())
+            {
+                example.Run(30.0, 0.0);
+            }
+        }
+    }
+}
